@@ -8,9 +8,13 @@ from scipy.signal import butter, lfilter
 import random
 
 def apply_low_pass_filter(audio, cutoff):
+    if cutoff < 20:
+        cutoff = 20  # Set a minimum cutoff frequency
     return low_pass_filter(audio, cutoff)
 
 def apply_high_pass_filter(audio, cutoff):
+    if cutoff < 20:
+        cutoff = 20  # Set a minimum cutoff frequency
     return high_pass_filter(audio, cutoff)
 
 def apply_distortion(audio, gain):
