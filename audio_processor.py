@@ -69,14 +69,6 @@ def apply_eq(audio, low_gain, mid_gain, high_gain):
 
     return audio._spawn(eq_samples.astype(np.int16).tobytes())
 
-def add_electrical_noise(audio, noise_level):
-    if noise_level == 0:
-        return audio
-    noise = WhiteNoise().to_audio_segment(duration=len(audio))
-    noise = noise - (50 - noise_level)  # Adjust noise level
-    combined = audio.overlay(noise)
-    return combined
-
 def add_mechanical_noise(audio, noise_level, mechanical_noise):
     if noise_level == 0:
         return audio
@@ -115,12 +107,27 @@ class AudioEditorApp:
         self.mid_eq_slider = self.create_slider("Mid EQ", 0, 10, 1)  # Neutral value
         self.high_eq_slider = self.create_slider("High EQ", 0, 10, 1)  # Neutral value
         
-        # self.electrical_noise_slider = self.create_slider("Electrical Noise", 0, 50, 0)  # Neutral value
         self.mechanical_noise_slider = self.create_slider("Mechanical Noise", 0, 40, 0)  # Adjusted range
         
-        self.traffic_toggle_var = tk.BooleanVar()
-        self.traffic_toggle = self.create_toggle("Traffic Sound", self.traffic_toggle_var)
-        self.traffic_volume_slider = self.create_slider("Traffic Volume", 20, 35, 20)  # Neutral value
+        # Adding multiple ambient sound files
+        self.ambient_sounds = [
+            {"label": "Traffic Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Traffic Sound 32180.mp3"},
+            {"label": "Mechanical Noise", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Mechanical noise.m4a"},
+            # Add paths to your additional ambient sound files here
+            {"label": "Park Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Central Park Sound.mp3"},
+            {"label": "Subway Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Subway Train Door Opening Sound.mp3"},
+            {"label": "Chatter Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Restaurant Chattering.mp3"}
+        ]
+
+        self.ambient_toggles = []
+        self.ambient_sliders = []
+        
+        for ambient in self.ambient_sounds:
+            toggle_var = tk.BooleanVar()
+            toggle = self.create_toggle(ambient["label"], toggle_var)
+            slider = self.create_slider(ambient["label"] + " Volume", 20, 35, 20)
+            self.ambient_toggles.append(toggle_var)
+            self.ambient_sliders.append(slider)
         
         self.randomize_button = tk.Button(root, text="Randomize", command=self.randomize_filters)
         self.randomize_button.pack()
@@ -128,8 +135,10 @@ class AudioEditorApp:
         self.apply_button = tk.Button(root, text="Apply Filters", command=self.apply_filters)
         self.apply_button.pack()
 
-        self.mechanical_noise = AudioSegment.from_file("/Users/luisliu/Desktop/Audiodata_convolution/Mechanical noise.m4a")
-        self.traffic_sound = AudioSegment.from_file("/Users/luisliu/Desktop/Audiodata_convolution/Traffic Sound 32180.mp3")
+        self.ambient_audio_segments = {
+            ambient["label"]: AudioSegment.from_file(ambient["file"])
+            for ambient in self.ambient_sounds
+        }
 
     def create_slider(self, label, from_, to, default):
         frame = tk.Frame(self.root)
@@ -165,13 +174,25 @@ class AudioEditorApp:
         audio = apply_distortion(audio, self.distortion_slider.get())
         audio = apply_reverb(audio, self.reverb_slider.get())
         audio = apply_eq(audio, self.low_eq_slider.get(), self.mid_eq_slider.get(), self.high_eq_slider.get())
-        # audio = add_electrical_noise(audio, self.electrical_noise_slider.get())
-        audio = add_mechanical_noise(audio, self.mechanical_noise_slider.get(), self.mechanical_noise)
+        audio = add_mechanical_noise(audio, self.mechanical_noise_slider.get(), self.ambient_audio_segments["Mechanical Noise"])
         
-        if self.traffic_toggle_var.get():
-            traffic_volume = self.traffic_volume_slider.get()
-            traffic_sound = self.traffic_sound - (50 - traffic_volume)  # Adjust traffic sound level
-            audio = audio.overlay(traffic_sound)
+        # Randomly choose an active ambient sound
+        active_ambient_sounds = [
+            i for i, toggle_var in enumerate(self.ambient_toggles) if toggle_var.get()
+        ]
+
+        if active_ambient_sounds:
+            chosen_index = random.choice(active_ambient_sounds)
+            chosen_ambient = self.ambient_sounds[chosen_index]["label"]
+            ambient_volume = self.ambient_sliders[chosen_index].get()
+            ambient_audio = self.ambient_audio_segments[chosen_ambient] - (50 - ambient_volume)  # Adjust ambient sound level
+            
+            # Randomize the start interval of the ambient sound
+            if len(audio) < len(ambient_audio):
+                start_time = random.randint(0, len(ambient_audio) - len(audio))
+                ambient_audio = ambient_audio[start_time:start_time + len(audio)]
+            
+            audio = audio.overlay(ambient_audio)
         
         output_path = "output.wav"
         audio.export(output_path, format="wav")
@@ -185,10 +206,16 @@ class AudioEditorApp:
         self.low_eq_slider.set(random.randint(0, 10))
         self.mid_eq_slider.set(random.randint(0, 10))
         self.high_eq_slider.set(random.randint(0, 10))
-        # self.electrical_noise_slider.set(random.randint(0, 50))
-        self.mechanical_noise_slider.set(random.randint(0, 50))
-        self.traffic_toggle_var.set(random.choice([True, False]))
-        self.traffic_volume_slider.set(random.randint(20, 35))
+        self.mechanical_noise_slider.set(random.randint(20, 35))
+        
+        for toggle_var in self.ambient_toggles:
+            toggle_var.set(False)
+        
+        chosen_index = random.randint(0, len(self.ambient_toggles) - 1)
+        self.ambient_toggles[chosen_index].set(True)
+        
+        for slider in self.ambient_sliders:
+            slider.set(random.randint(25, 35))
 
 if __name__ == "__main__":
     root = tk.Tk()
