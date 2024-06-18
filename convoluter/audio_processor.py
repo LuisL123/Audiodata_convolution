@@ -111,12 +111,12 @@ class AudioEditorApp:
         
         # Adding multiple ambient sound files
         self.ambient_sounds = [
-            {"label": "Traffic Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Traffic Sound 32180.mp3"},
-            {"label": "Mechanical Noise", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Mechanical noise.m4a"},
+            {"label": "Traffic Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/convoluter/Traffic Sound 32180.mp3"},
+            {"label": "Mechanical Noise", "file": "/Users/luisliu/Desktop/Audiodata_convolution/convoluter/Mechanical noise.m4a"},
             # Add paths to your additional ambient sound files here
-            {"label": "Park Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Central Park Sound.mp3"},
-            {"label": "Subway Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Subway Train Door Opening Sound.mp3"},
-            {"label": "Chatter Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/Restaurant Chattering.mp3"}
+            {"label": "Park Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/convoluter/Central Park Sound.mp3"},
+            {"label": "Subway Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/convoluter/Subway Train Door Opening Sound.mp3"},
+            {"label": "Chatter Sound", "file": "/Users/luisliu/Desktop/Audiodata_convolution/convoluter/Restaurant Chattering.mp3"}
         ]
 
         self.ambient_toggles = []
