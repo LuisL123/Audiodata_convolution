@@ -95,10 +95,6 @@ def add_mechanical_noise(audio, noise_level, mechanical_noise):
     return combined
 
 
-
-# ambient sounds: traffic, parks, subway, wind, chatter.
-
-
 class AudioEditorApp:
     def __init__(self, root):
         self.root = root
@@ -110,8 +106,8 @@ class AudioEditorApp:
         self.load_button = tk.Button(root, text="Load WAV", command=self.load_wav)
         self.load_button.pack()
 
-        self.low_pass_slider = self.create_slider("Low Pass Filter", 20, 5000, 5000)  # Neutral value
-        self.high_pass_slider = self.create_slider("High Pass Filter", 20, 5000, 20)  # Neutral value
+        self.low_pass_slider = self.create_slider("Low Pass Filter", 300, 5000, 5000)  # Adjusted range
+        self.high_pass_slider = self.create_slider("High Pass Filter", 20, 3000, 20)  # Adjusted range
         self.distortion_slider = self.create_slider("Distortion", 1, 10, 1)  # Neutral value
         self.reverb_slider = self.create_slider("Reverb", 1, 10, 1)  # Neutral value
 
@@ -120,8 +116,12 @@ class AudioEditorApp:
         self.high_eq_slider = self.create_slider("High EQ", 0, 10, 1)  # Neutral value
         
         # self.electrical_noise_slider = self.create_slider("Electrical Noise", 0, 50, 0)  # Neutral value
-        self.mechanical_noise_slider = self.create_slider("Mechanical Noise", 0, 50, 0)  # Neutral value
-
+        self.mechanical_noise_slider = self.create_slider("Mechanical Noise", 0, 40, 0)  # Adjusted range
+        
+        self.traffic_toggle_var = tk.BooleanVar()
+        self.traffic_toggle = self.create_toggle("Traffic Sound", self.traffic_toggle_var)
+        self.traffic_volume_slider = self.create_slider("Traffic Volume", 20, 35, 20)  # Neutral value
+        
         self.randomize_button = tk.Button(root, text="Randomize", command=self.randomize_filters)
         self.randomize_button.pack()
 
@@ -129,6 +129,7 @@ class AudioEditorApp:
         self.apply_button.pack()
 
         self.mechanical_noise = AudioSegment.from_file("/Users/luisliu/Desktop/Audiodata_convolution/Mechanical noise.m4a")
+        self.traffic_sound = AudioSegment.from_file("/Users/luisliu/Desktop/Audiodata_convolution/Traffic Sound 32180.mp3")
 
     def create_slider(self, label, from_, to, default):
         frame = tk.Frame(self.root)
@@ -139,6 +140,15 @@ class AudioEditorApp:
         slider.set(default)
         slider.pack(side=tk.RIGHT)
         return slider
+
+    def create_toggle(self, label, variable):
+        frame = tk.Frame(self.root)
+        frame.pack()
+        label = tk.Label(frame, text=label)
+        label.pack(side=tk.LEFT)
+        toggle = tk.Checkbutton(frame, variable=variable)
+        toggle.pack(side=tk.RIGHT)
+        return toggle
 
     def load_wav(self):
         self.filepath = filedialog.askopenfilename(filetypes=[("WAV files", "*.wav")])
@@ -157,14 +167,19 @@ class AudioEditorApp:
         audio = apply_eq(audio, self.low_eq_slider.get(), self.mid_eq_slider.get(), self.high_eq_slider.get())
         # audio = add_electrical_noise(audio, self.electrical_noise_slider.get())
         audio = add_mechanical_noise(audio, self.mechanical_noise_slider.get(), self.mechanical_noise)
-
+        
+        if self.traffic_toggle_var.get():
+            traffic_volume = self.traffic_volume_slider.get()
+            traffic_sound = self.traffic_sound - (50 - traffic_volume)  # Adjust traffic sound level
+            audio = audio.overlay(traffic_sound)
+        
         output_path = "output.wav"
         audio.export(output_path, format="wav")
         print("Saved to:", output_path)
 
     def randomize_filters(self):
-        self.low_pass_slider.set(random.randint(1, 5000))
-        self.high_pass_slider.set(random.randint(1, 5000))
+        self.low_pass_slider.set(random.randint(300, 5000))
+        self.high_pass_slider.set(random.randint(20, 3000))
         self.distortion_slider.set(random.randint(1, 10))
         self.reverb_slider.set(random.randint(1, 10))
         self.low_eq_slider.set(random.randint(0, 10))
@@ -172,9 +187,10 @@ class AudioEditorApp:
         self.high_eq_slider.set(random.randint(0, 10))
         # self.electrical_noise_slider.set(random.randint(0, 50))
         self.mechanical_noise_slider.set(random.randint(0, 50))
+        self.traffic_toggle_var.set(random.choice([True, False]))
+        self.traffic_volume_slider.set(random.randint(20, 35))
 
 if __name__ == "__main__":
     root = tk.Tk()
     app = AudioEditorApp(root)
     root.mainloop()
-
