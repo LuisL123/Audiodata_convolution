@@ -34,9 +34,15 @@ While developing **Synfi**, an AI music application, I needed to train a neural 
   - `tkinter`
 - Ensure you have an appropriate environment for running Python GUI applications.
 
-## Installation
+## How to set up and use it
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/audiodata-convoluter.git
    cd audiodata-convoluter
+2. Install all dependencies.
+3. Run the program:
+   ```bash
+   python 
+
+
