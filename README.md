@@ -30,8 +30,7 @@ While developing **Synfi**, an AI music application, I needed to train a neural 
 - Required Python libraries:
   - `numpy`
   - `scipy`
-  - `pyaudio`
-  - `librosa`
+  - `pydub`
   - `tkinter`
 - Ensure you have an appropriate environment for running Python GUI applications.
 
