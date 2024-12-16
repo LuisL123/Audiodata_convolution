@@ -43,6 +43,17 @@ While developing **Synfi**, an AI music application, I needed to train a neural 
 2. Install all dependencies.
 3. Run the program:
    ```bash
-   python 
+   python audio_processor.py #or
+   python3 audio_processor.py
+3. Use the Python GUI to:
+  * Select the audio files you want to process.
+  * Configure transformation parameters (filters, noise, pitch shifting, etc.).
+  * Optionally, randomize the parameters for greater variability.
+
+## Contribution
+
+Contributions are welcome! The idea of this program is to facilitate the process of audio data creation and quality. If you'd like to improve this project or add new features, feel free to open an issue or submit a pull request.
+
+
 
 
